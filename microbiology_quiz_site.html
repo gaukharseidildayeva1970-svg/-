@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Микробиология Quiz</title>
+<style>
+:root{--bg:#f4f3ff;--ink:#20213a;--muted:#70718b;--purple:#6857e8;--purple2:#8d7cff;--green:#159b70;--red:#d94b63;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#f3f0ff,#e9f8ff);font-family:Inter,Arial,sans-serif;color:var(--ink);min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px clamp(16px,5vw,60px)}
+.brand{font-weight:900;font-size:20px;color:var(--purple)}.tag{font-size:13px;color:var(--muted);background:#fff;padding:9px 13px;border-radius:20px}
+main{max-width:850px;margin:25px auto;padding:0 16px 40px}
+.panel{background:var(--card);border-radius:25px;padding:clamp(22px,5vw,42px);box-shadow:0 18px 55px #4e46a51a}
+.center{text-align:center}.eyebrow{color:var(--purple);font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,42px);margin:12px 0}p{color:var(--muted);line-height:1.6}
+.primary{border:0;background:linear-gradient(100deg,var(--purple),var(--purple2));color:white;font-size:16px;font-weight:800;padding:15px 27px;border-radius:14px;cursor:pointer;box-shadow:0 8px 20px #6857e844}
+.primary:hover{transform:translateY(-1px)}.secondary{border:1px solid #dedcf4;background:white;color:var(--purple);padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer}
+.meta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:25px 0}.meta span{background:#f2f0ff;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:700}
+.topline{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px;font-weight:800;font-size:14px}
+.progress{height:9px;background:#eeedfa;border-radius:20px;overflow:hidden;margin-bottom:27px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--purple),#a99cff);transition:width .3s}
+.question{font-size:clamp(20px,3vw,27px);line-height:1.35;margin:0 0 24px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.answer{border:2px solid #e8e7f2;background:white;border-radius:15px;padding:17px;text-align:left;font-size:16px;line-height:1.4;cursor:pointer;min-height:75px;display:flex;gap:12px;align-items:center;color:var(--ink)}
+.answer:hover{border-color:var(--purple);background:#faf9ff}.letter{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:#f0effb;color:var(--purple);display:grid;place-items:center;font-weight:900}
+.answer.correct{border-color:var(--green);background:#eaf9f3}.answer.correct .letter{background:var(--green);color:white}.answer.wrong{border-color:var(--red);background:#fff0f2}.answer:disabled{cursor:default}
+.feedback{margin-top:18px;padding:14px 16px;border-radius:13px;font-weight:700;display:none}.feedback.good{display:block;background:#eaf9f3;color:#087650}.feedback.bad{display:block;background:#fff0f2;color:#b52f49}
+.actions{display:flex;justify-content:flex-end;margin-top:20px}
+.result-score{font-size:64px;font-weight:900;color:var(--purple);margin:12px 0}.review{margin-top:24px;text-align:left}.review-item{padding:14px 0;border-bottom:1px solid #eee}.review-item strong{display:block;margin-bottom:6px}.ok{color:var(--green)}.no{color:var(--red)}
+.hidden{display:none!important}
+@media(max-width:600px){.answers{grid-template-columns:1fr}.answer{min-height:62px}header{padding:14px}.panel{border-radius:20px}}
+</style>
+</head>
+<body>
+<header><div class="brand">✦ MICRO QUIZ</div><div class="tag">Микробиология • Вирусология</div></header>
+<main>
+<section id="start" class="panel center">
+ <div class="eyebrow">Интерактивті тест</div>
+ <h1>Білімінді тексер!</h1>
+ <p>Бактериялар генетикасы және микробқа қарсы препараттар</p>
+ <div class="meta"><span>20 сұрақ</span><span>Орташа деңгей</span><span>1 дұрыс жауап</span></div>
+ <p>Әр сұраққа бір жауап таңда. Соңында нәтижең мен дұрыс жауаптарды көресің.</p>
+ <button class="primary" onclick="startQuiz()">Тестті бастау →</button>
+</section>
+<section id="quiz" class="panel hidden">
+ <div class="topline"><span id="counter">1 / 20 сұрақ</span><span id="scoreLive">Ұпай: 0</span></div>
+ <div class="progress"><div class="bar" id="bar"></div></div>
+ <h2 class="question" id="question"></h2>
+ <div class="answers" id="answers"></div>
+ <div id="feedback" class="feedback"></div>
+ <div class="actions"><button id="next" class="primary hidden" onclick="nextQuestion()">Келесі сұрақ →</button></div>
+</section>
+<section id="result" class="panel center hidden">
+ <div class="eyebrow">Тест аяқталды</div><h1>Нәтижең</h1>
+ <div class="result-score" id="percent">0%</div>
+ <h2 id="resultText"></h2><p id="resultDetail"></p>
+ <button class="primary" onclick="restartQuiz()">Қайта тапсыру ↻</button>
+ <div class="review" id="review"></div>
+</section>
+</main>
+<script>
+const questions = [
+{q:"Бактериялар генетикасы нені зерттейді?",a:["Бактериялардың қоректену ерекшеліктерін","Тұқымқуалаушылық пен өзгергіштікті","Бактериялардың тыныс алуын","Жасушаның химиялық құрамын"],c:1},
+{q:"Бактерия хромосомасының негізгі генетикалық материалы қандай?",a:["Рибонуклеин қышқылы","Дезоксирибонуклеин қышқылы","Ақуыз молекулалары","Липидті қосылыстар"],c:1},
+{q:"Плазмида дегеніміз не?",a:["Жасуша қабырғасының құрамдас бөлігі","Қосымша сақиналы ДНҚ молекуласы","Рибосоманың негізгі құрылымы","Цитоплазмалық мембрана бөлігі"],c:1},
+{q:"Трансформация процесі дегеніміз не?",a:["Бактерияның спора түзуі","Бос ДНҚ-ны бактерияның қабылдауы","Бактерияның екіге бөлінуі","Вирустың жасушаға енуі"],c:1},
+{q:"Трансдукция қандай жолмен жүреді?",a:["Бактериофаг арқылы генетикалық материал берілуі","Жасушалардың тікелей жанасуы","Бос ДНҚ фрагменттерінің сіңірілуі","Генетикалық материалдың жоғалуы"],c:0},
+{q:"Конъюгация процесінің ерекшелігі қандай?",a:["Бактериялардың спора арқылы көбеюі","Генетикалық материалдың тікелей берілуі","Бактериялардың өздігінен жойылуы","ДНҚ молекуласының ыдырауы"],c:1},
+{q:"Мутация дегеніміз не?",a:["Генетикалық материалдың тұрақты өзгеруі","Бактериялардың қоректенуінің өзгеруі","Жасушаның уақытша бейімделуі","Микроорганизмдердің көбеюі"],c:0},
+{q:"Бактериялардың антибиотиктерге төзімділігі қалай қалыптасуы мүмкін?",a:["Генетикалық өзгерістер мен гендердің берілуі","Қоректік ортаның құрамының өзгеруі","Температураның уақытша төмендеуі","Жасуша көлемінің ұлғаюы"],c:0},
+{q:"Химиотерапияның негізгі мақсаты қандай?",a:["Ағзаның температурасын қалыпқа келтіру","Қоздырғыштарды таңдамалы түрде жою","Иммундық жүйені толық алмастыру","Тіндердің жаңаруын жеделдету"],c:1},
+{q:"Микробқа қарсы препараттардың таңдамалы әсері нені білдіреді?",a:["Барлық жасушаларға бірдей әсер етуін","Микробтарға басым әсер етуін","Тек вирустарды жою қабілетін","Ағзаның барлық қызметін тежеуін"],c:1},
+{q:"Бактерицидтік препараттардың әсері қандай?",a:["Бактериялардың өсуін баяулатады","Бактерияларды жояды","Вирустардың көбеюін тежейді","Иммундық жауапты төмендетеді"],c:1},
+{q:"Бактериостатикалық препараттарға тән қасиет қандай?",a:["Бактериялардың көбеюін тежейді","Бактерияларды бірден жояды","Вирустарды толық залалсыздандырады","Споралардың түзілуін күшейтеді"],c:0},
+{q:"Антибиотиктер қандай микроорганизмдерге әсер етеді?",a:["Тек вирустарға әсер етеді","Бактерияларға қарсы әсер етеді","Тек қарапайымдыларға әсер етеді","Барлық микроорганизмдерді жояды"],c:1},
+{q:"Пенициллиндер тобының негізгі әсер ету механизмі қандай?",a:["Ақуыз синтезін тежеу","Жасуша қабырғасының түзілуін бұзу","Нуклеин қышқылдарын ыдырату","Жасуша мембранасын қалпына келтіру"],c:1},
+{q:"Тетрациклиндер қандай жасушалық процесті тежейді?",a:["Ақуыз синтезін","Жасуша қабырғасының түзілуін","Энергияның бөлінуін","Споралардың жетілуін"],c:0},
+{q:"Антибиотиктерге сезімталдықты анықтаудың кең таралған әдісі қандай?",a:["Грам бойынша бояу әдісі","Дискілік диффузиялық әдіс","Қараңғы өрісті микроскопия","Биохимиялық идентификация"],c:1},
+{q:"Антибиотикограмма нені анықтауға мүмкіндік береді?",a:["Бактерияның морфологиялық пішінін","Препараттарға сезімталдық деңгейін","Микроорганизмнің көбею жылдамдығын","Бактерияның қоректену қажеттілігін"],c:1},
+{q:"Вирустық инфекцияларды емдеуде қандай препараттар қолданылады?",a:["Антибактериялық препараттар","Антивирустық препараттар","Саңырауқұлаққа қарсы препараттар","Антисептикалық ерітінділер"],c:1},
+{q:"Антивирустық препараттардың негізгі әсер ету бағыты қандай?",a:["Вирустың көбею кезеңдерін тежеу","Бактериялардың қабырғасын бұзу","Саңырауқұлақтардың өсуін тоқтату","Қан жасушаларының түзілуін арттыру"],c:0},
+{q:"Вирустарға қарсы антибиотиктердің әсер етпеу себебі неде?",a:["Вирустарда бактериялық жасуша құрылымдарының болмауы","Вирустардың қоректік ортада өсуі","Вирустардың спора түзу қабілеті","Вирустардың жасушалық қабырғасының болуы"],c:0}
+];
+let index=0,score=0,chosen=[];
+function startQuiz(){index=0;score=0;chosen=[];document.getElementById('start').classList.add('hidden');document.getElementById('result').classList.add('hidden');document.getElementById('quiz').classList.remove('hidden');render()}
+function render(){
+ const q=questions[index];document.getElementById('counter').textContent=`${index+1} / ${questions.length} сұрақ`;document.getElementById('scoreLive').textContent=`Ұпай: ${score}`;document.getElementById('bar').style.width=`${index/questions.length*100}%`;document.getElementById('question').textContent=q.q;
+ const box=document.getElementById('answers');box.innerHTML='';document.getElementById('feedback').className='feedback';document.getElementById('feedback').textContent='';document.getElementById('next').classList.add('hidden');
+ q.a.forEach((answer,i)=>{const b=document.createElement('button');b.className='answer';b.innerHTML=`<span class="letter">${['A','Б','В','Г'][i]}</span><span></span>`;b.querySelector('span:last-child').textContent=answer;b.onclick=()=>choose(i);box.appendChild(b)});
+}
+function choose(i){
+ if(chosen[index]!==undefined)return;chosen[index]=i;const q=questions[index],correct=i===q.c;if(correct)score++;
+ [...document.querySelectorAll('.answer')].forEach((b,j)=>{b.disabled=true;if(j===q.c)b.classList.add('correct');if(j===i&&!correct)b.classList.add('wrong')});
+ const f=document.getElementById('feedback');f.className='feedback '+(correct?'good':'bad');f.textContent=correct?'Дұрыс жауап! +1 ұпай':'Қате жауап. Дұрыс жауап: '+['А','Б','В','Г'][q.c]+') '+q.a[q.c];
+ document.getElementById('scoreLive').textContent=`Ұпай: ${score}`;document.getElementById('next').textContent=index===questions.length-1?'Нәтижені көру':'Келесі сұрақ →';document.getElementById('next').classList.remove('hidden');
+}
+function nextQuestion(){if(index<questions.length-1){index++;render()}else showResult()}
+function showResult(){
+ document.getElementById('quiz').classList.add('hidden');document.getElementById('result').classList.remove('hidden');const pct=Math.round(score/questions.length*100);document.getElementById('percent').textContent=pct+'%';document.getElementById('resultText').textContent=score>=18?'Өте жақсы!':score>=15?'Жақсы нәтиже!':score>=11?'Қанағаттанарлық':'Қосымша дайындық қажет';document.getElementById('resultDetail').textContent=`${questions.length} сұрақтың ${score}-іне дұрыс жауап бердің.`;
+ const r=document.getElementById('review');r.innerHTML='<h3>Жауаптарды талдау</h3>';questions.forEach((q,j)=>{const good=chosen[j]===q.c;const d=document.createElement('div');d.className='review-item';d.innerHTML=`<strong>${j+1}. ${q.q}</strong><span class="${good?'ok':'no'}">${good?'✓ Дұрыс':'✗ Қате'}</span> · Дұрыс жауап: ${['А','Б','В','Г'][q.c]}) ${q.a[q.c]}`;r.appendChild(d)});
+}
+function restartQuiz(){document.getElementById('result').classList.add('hidden');document.getElementById('start').classList.remove('hidden')}
+</script>
+</body></html>
